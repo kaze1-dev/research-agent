@@ -1,5 +1,6 @@
 from langchain.agents import create_agent
-from langchain_ollama import ChatOllama
-from backend.core.config import OLLAMA_MODEL
+from backend.agent.model import model
 
-model = ChatOllama(model=OLLAMA_MODEL)
+agent = create_agent(
+  model=model,
+)

@@ -5,4 +5,4 @@ router = APIRouter(prefix="/research", tags=["Research"])
 
 @router.post("")
 async def research(request: ResearchRequest):
-  ""
+  """"""

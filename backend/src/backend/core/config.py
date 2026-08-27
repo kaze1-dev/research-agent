@@ -1,6 +1,16 @@
-from dotenv import load_dotenv
-import os
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-load_dotenv()
 
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL")
+class Settings(BaseSettings):
+    OPENROUTER_API_KEY: str
+    OPENROUTER_MODEL: str = "openrouter/free"
+
+    model_config = SettingsConfigDict(
+        env_file=".env"
+    )
+
+
+settings = Settings()
+
+OPENROUTER_API_KEY = settings.OPENROUTER_API_KEY
+OPENROUTER_MODEL = settings.OPENROUTER_MODEL    

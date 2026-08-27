@@ -1,11 +1,14 @@
-import os
-
-from dotenv import load_dotenv
-
-load_dotenv()
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
+class Settings(BaseSettings):
+    TAVILY_API_KEY: str
 
-if not TAVILY_API_KEY:
-    raise RuntimeError("TAVILY_API_KEY is not configured")
+    model_config = SettingsConfigDict(
+        env_file=".env"
+    )
+
+
+settings = Settings()
+
+TAVILY_API_KEY = settings.TAVILY_API_KEY

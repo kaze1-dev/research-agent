@@ -8,6 +8,6 @@ tavily = TavilyClient(api_key=TAVILY_API_KEY)
 
 async def search_web(query: str) -> str:
     """Search the web using Tavily."""
-    response = await tavily.search(query=query)
+    response = tavily.search(query=query)
 
     return str(response)

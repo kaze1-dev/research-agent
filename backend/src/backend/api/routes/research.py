@@ -19,6 +19,11 @@ async def research(query: str):
                     }
                 ]
             },
+            config={
+                "configurable": {
+                    "thread_id": "test-thread-123",
+                }
+            },
             stream_mode="messages",
         ):
             message_chunk, metadata = chunk

@@ -74,10 +74,8 @@ export default function ResearchWorkspace({
 
             buffer += decoder.decode(value, { stream: true });
 
-            // SSE events are separated by a blank line.
             const events = buffer.split(/\r?\n\r?\n/);
 
-            // Keep incomplete event in the buffer.
             buffer = events.pop() ?? "";
 
             for (const event of events) {

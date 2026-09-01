@@ -1,8 +1,8 @@
 # Research Agent
 
-An AI-powered research assistant built with **Next.js, FastAPI, LangGraph, and MCP**.
+An AI-powered research assistant built with **Next.js, FastAPI, LangGraph, MCP, and Server-Sent Events (SSE)**.
 
-The goal is to explore and build a modular AI research system with **agentic workflows, MCP-based tool integration, and web research capabilities**.
+The goal is to explore and build a modular AI research system with **agentic workflows, MCP-based tool integration, web research capabilities, and real-time streaming responses**.
 
 > **Work in progress — v1**
 
@@ -15,11 +15,14 @@ The goal is to explore and build a modular AI research system with **agentic wor
 - LangChain
 - LangGraph
 - MCP
-- Ollama, Openrouter, Groq
+- Server-Sent Events (SSE)
+- Ollama
+- OpenRouter
+- Groq
 
 ## Structure
 
-```text id="k7w9p2"
+```text
 research-agent/
 ├── backend/
 ├── client/
@@ -29,5 +32,11 @@ research-agent/
 ## Status
 
 Currently building the initial v1 architecture and interface.
+
+- Agentic research workflow
+- MCP-based tool integration
+- Web research
+- Real-time response streaming with SSE
+- Initial frontend interface
 
 More documentation will be added as the project develops.

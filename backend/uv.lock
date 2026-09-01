@@ -59,6 +59,7 @@ dependencies = [
     { name = "mcp", extra = ["cli"] },
     { name = "ollama" },
     { name = "python-dotenv" },
+    { name = "sse-starlette" },
     { name = "tavily-python" },
     { name = "uvicorn" },
 ]
@@ -74,6 +75,7 @@ requires-dist = [
     { name = "mcp", extras = ["cli"], specifier = ">=1.24.0,<2.0.0" },
     { name = "ollama", specifier = ">=0.6.2" },
     { name = "python-dotenv", specifier = ">=1.2.3" },
+    { name = "sse-starlette", specifier = ">=3.4.8" },
     { name = "tavily-python", specifier = ">=0.7.27" },
     { name = "uvicorn", specifier = ">=0.52.3" },
 ]

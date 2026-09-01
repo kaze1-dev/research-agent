@@ -48,6 +48,9 @@ export default function ResearchWorkspace({
             `http://localhost:8000/research?query=${encodeURIComponent(prompt)}`,
             {
                method: "POST",
+               headers: {
+                  Accept: "text/event-stream",
+               },
             }
          );
 
@@ -62,23 +65,52 @@ export default function ResearchWorkspace({
          const reader = response.body.getReader();
          const decoder = new TextDecoder();
 
+         let buffer = "";
+
          while (true) {
             const { done, value } = await reader.read();
 
             if (done) break;
 
-            const chunk = decoder.decode(value, { stream: true });
+            buffer += decoder.decode(value, { stream: true });
 
-            setMessages((currentMessages) =>
-               currentMessages.map((message) =>
-                  message.id === assistantMessageId
-                     ? {
-                        ...message,
-                        content: message.content + chunk,
-                     }
-                     : message
-               )
-            );
+            // SSE events are separated by a blank line.
+            const events = buffer.split(/\r?\n\r?\n/);
+
+            // Keep incomplete event in the buffer.
+            buffer = events.pop() ?? "";
+
+            for (const event of events) {
+               const lines = event.split(/\r?\n/);
+
+               let eventType = "message";
+               const dataLines: string[] = [];
+
+               for (const line of lines) {
+                  if (line.startsWith("event:")) {
+                     eventType = line.slice("event:".length).trim();
+                  }
+
+                  if (line.startsWith("data:")) {
+                     dataLines.push(line.slice("data:".length));
+                  }
+               }
+
+               const data = dataLines.join("\n");
+
+               if (eventType === "message" && data) {
+                  setMessages((currentMessages) =>
+                     currentMessages.map((message) =>
+                        message.id === assistantMessageId
+                           ? {
+                              ...message,
+                              content: message.content + data,
+                           }
+                           : message
+                     )
+                  );
+               }
+            }
          }
       } catch (error) {
          console.error("Research request failed:", error);
@@ -108,7 +140,6 @@ export default function ResearchWorkspace({
 
    return (
       <section className="flex h-[calc(100vh-4rem)] min-w-0 flex-1 flex-col bg-zinc-950">
-         {/* Workspace header */}
          <div className="flex h-16 shrink-0 items-center justify-between border-b border-zinc-800 px-4 sm:px-6">
             <div className="flex min-w-0 items-center gap-3">
                <button
@@ -142,12 +173,6 @@ export default function ResearchWorkspace({
                         className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"
                            }`}
                      >
-                        {/* {!isUser && (
-                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-sm font-bold text-zinc-950">
-                              ✦
-                           </div>
-                        )} */}
-
                         <div
                            className={`
                     max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-7
@@ -158,17 +183,15 @@ export default function ResearchWorkspace({
                               }
                   `}
                         >
-                           {message.content} 
+                           {message.content}
                         </div>
                      </div>
                   );
                })}
+
                {isLoading && (
-                              <div className="h-2.5 w-2.5 animate-pulse bg-zinc-400 rounded-full"></div>
-                           )}
-               {/* {isLoading && (
-                  <div className="h-2.5 w-2.5 animate-pulse bg-zinc-400 rounded-full"></div>
-               )} */}
+                  <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-zinc-400" />
+               )}
             </div>
          </div>
 

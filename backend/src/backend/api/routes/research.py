@@ -10,28 +10,53 @@ router = APIRouter()
 async def research(query: str):
 
     async def generate():
-        async for chunk in agent_module.agent.astream(
+
+        async for mode, chunk in agent_module.agent.astream(
             {
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": query,
-                    }
-                ]
+                "query": query,
+                "plan": [],
+                "research": [],
+                "answers": "",
             },
             config={
                 "configurable": {
                     "thread_id": "test-thread-123",
                 }
             },
-            stream_mode="messages",
+            stream_mode=["updates", "custom"],
         ):
-            message_chunk, metadata = chunk
+            print(mode, chunk)  
+            if mode == "updates":
 
-            if message_chunk.content:
-                yield {
-                    "event": "message",
-                    "data": message_chunk.content,
-                }
+                if "planner" in chunk:
+
+                    plan = chunk["planner"]["plan"]
+
+                    yield {
+                        "event": "planning",
+                        "data": "Planning...",
+                    }
+
+                    for task in plan:
+                        yield {
+                            "event": "plan",
+                            "data": task,
+                        }
+
+            elif mode == "custom":
+
+                if chunk["type"] == "task_started":
+
+                    yield {
+                        "event": "task_started",
+                        "data": chunk["task"],
+                    }
+
+                elif chunk["type"] == "task_completed":
+
+                    yield {
+                        "event": "task_completed",
+                        "data": chunk["task"],
+                    }
 
     return EventSourceResponse(generate())

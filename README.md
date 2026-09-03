@@ -248,35 +248,59 @@ Researching...
 
 ## Project Structure
 
-```text
 research-agent/
 │
 ├── backend/
 │   └── src/
 │       └── backend/
 │           ├── agent/
+│           │   ├── agent.py
 │           │   ├── planner.py
 │           │   ├── researcher.py
-│           │   ├── synthesizer.py
 │           │   ├── state.py
-│           │   └── agent.py
+│           │   └── synthesizer.py
 │           │
 │           ├── api/
-│           │   └── research.py
+│           │   └── routes/
+│           │       └── research.py
 │           │
 │           ├── core/
 │           │   └── config.py
 │           │
-│           └── schemas/
+│           ├── mcp/
+│           │   └── client.py
+│           │
+│           ├── schemas/
+│           │   └── research.py
+│           │
+│           └── tools/
 │
 ├── client/
+│   ├── app/
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   └── ...
+│   │
+│   ├── components/
+│   │   └── ...
+│   │
+│   ├── public/
+│   │   └── ...
+│   │
+│   ├── package.json
 │   └── ...
 │
 ├── mcp-server/
-│   └── ...
+│   └── mcp_server/
+│       ├── __init__.py
+│       ├── config.py
+│       ├── server.py
+│       │
+│       └── tools/
+│           ├── __init__.py
+│           └── search.py
 │
 └── README.md
-```
 
 ---
 

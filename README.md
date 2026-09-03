@@ -20,7 +20,7 @@ flowchart TD
 
     C --> D[MCP Client]
     D --> E[MCP Server]
-    E --> F[Tavily Search]
+    E --> F[Search]
     F --> E
     E --> D
     D --> C
@@ -64,7 +64,6 @@ User Query
        │
        ▼
 ┌─────────────┐
-│ Tavily      │
 │ Web Search  │
 └──────┬──────┘
        │
@@ -159,7 +158,7 @@ Web search is separated from the main agent through an **MCP server**.
           │
           ▼
 ┌────────────────────┐
-│ Tavily Web Search  │
+│     Web Search     │
 └────────────────────┘
 ```
 

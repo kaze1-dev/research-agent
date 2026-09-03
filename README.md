@@ -18,17 +18,21 @@ flowchart TD
 
     B -->|Research Plan| C[Researcher]
 
-    C --> D[MCP Search Tool]
-    D -->|Web Research| C
+    C --> D[MCP Client]
+    D --> E[MCP Server]
+    E --> F[Tavily Search]
+    F --> E
+    E --> D
+    D --> C
 
-    C -->|Research Results| E[Synthesizer]
+    C -->|Research Results| G[Synthesizer]
+    G --> H[Final Answer]
 
-    E --> F[Final Answer]
+    B -.->|Plan Events| I[SSE Stream]
+    C -.->|Progress Events| I
+    G -.->|Answer| I
 
-    C -.->|Progress Events| G[SSE Stream]
-    B -.->|Plan Events| G
-
-    G --> H[Next.js Frontend]
+    I --> J[Next.js Frontend]
 ```
 
 ### Research Flow
@@ -49,13 +53,23 @@ User Query
        │
        │ MCP
        ▼
-┌─────────────────┐
-│  Search Tool    │
-│   (Web Search)  │
-└────────┬────────┘
-         │
-         │ Research Results
-         ▼
+┌─────────────┐
+│ MCP Client  │
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│ MCP Server  │
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│ Tavily      │
+│ Web Search  │
+└──────┬──────┘
+       │
+       │ Research Results
+       ▼
 ┌─────────────┐
 │ Synthesizer │
 └──────┬──────┘
@@ -86,9 +100,9 @@ Planner:
 └── Evaluate developer experience
 ```
 
-The planner uses **structured output** with a Pydantic schema so that the generated research plan can be passed directly into the next LangGraph node.
+The planner uses **structured output** with a Pydantic schema so the generated research plan can be passed directly into the next LangGraph node.
 
-The planner is responsible only for **decomposing the problem**. It does not perform the research or synthesize the final answer.
+The Planner is responsible only for **decomposing the problem**. It does not perform web research or synthesize the final answer.
 
 ---
 
@@ -96,9 +110,15 @@ The planner is responsible only for **decomposing the problem**. It does not per
 
 The **Researcher** receives the generated plan and executes each research task.
 
-It discovers the available MCP tools and uses the MCP `search` tool to perform web searches.
+For every task, it:
 
-Each task produces progress events:
+1. Retrieves the available MCP tools.
+2. Selects the MCP `search` tool.
+3. Sends the research task to the search tool.
+4. Collects the returned research.
+5. Emits progress events while the task is running.
+
+Example progress:
 
 ```text
 ⟳ Investigate AI/ML libraries and frameworks
@@ -111,7 +131,7 @@ Each task produces progress events:
 ✓ Compare performance characteristics
 ```
 
-The research results are collected and passed to the Synthesizer.
+Once all tasks are complete, the collected research is passed to the Synthesizer.
 
 ---
 
@@ -120,24 +140,32 @@ The research results are collected and passed to the Synthesizer.
 Web search is separated from the main agent through an **MCP server**.
 
 ```text
-LangGraph Researcher
-        │
-        ▼
-   MCP Client
-        │
-        ▼
-   MCP Server
-        │
-        ▼
-    search()
-        │
-        ▼
-   Tavily Web Search
+┌────────────────────┐
+│ LangGraph          │
+│ Researcher         │
+└─────────┬──────────┘
+          │
+          ▼
+┌────────────────────┐
+│ MCP Client         │
+└─────────┬──────────┘
+          │
+          ▼
+┌────────────────────┐
+│ MCP Server         │
+│                    │
+│ search()           │
+└─────────┬──────────┘
+          │
+          ▼
+┌────────────────────┐
+│ Tavily Web Search  │
+└────────────────────┘
 ```
 
-This keeps external tools modular and allows additional MCP tools to be added without tightly coupling them to the agent implementation.
+The MCP server currently exposes a `search` tool backed by Tavily.
 
-The MCP server currently exposes a `search` tool backed by web search functionality.
+This separation keeps external tools modular and allows additional MCP tools to be added without tightly coupling them to the main research agent.
 
 ---
 
@@ -150,7 +178,7 @@ Its responsibility is to:
 - Analyze the collected research
 - Combine information from multiple searches
 - Resolve the findings into a coherent response
-- Generate the final answer for the user
+- Generate the final answer
 
 This keeps **research** and **answer generation** as separate stages of the workflow.
 
@@ -177,14 +205,14 @@ Final Answer
 
 ## Real-Time Streaming
 
-The backend uses **Server-Sent Events (SSE)** to stream agent progress to the frontend.
+The backend uses **Server-Sent Events (SSE)** to stream research progress to the frontend.
 
-LangGraph emits different types of events during execution:
+LangGraph produces different event types during execution:
 
 ```text
 Planner
    │
-   └── plan events
+   └── plan
 
 Researcher
    │
@@ -196,7 +224,7 @@ Synthesizer
    └── final answer
 ```
 
-The frontend can therefore display the agent's progress while the research is happening instead of waiting for the entire workflow to finish.
+This allows the frontend to display the agent's progress while research is happening instead of waiting for the entire workflow to finish.
 
 Example:
 
@@ -210,6 +238,8 @@ Researching...
 ○ Evaluate developer experience
 ```
 
+The research endpoint uses `EventSourceResponse` to expose these events as an SSE stream.
+
 ---
 
 ## Tech Stack
@@ -219,6 +249,7 @@ Researching...
 - Next.js
 - TypeScript
 - Tailwind CSS
+- App Router
 
 ### Backend
 
@@ -248,6 +279,7 @@ Researching...
 
 ## Project Structure
 
+```text
 research-agent/
 │
 ├── backend/
@@ -301,6 +333,30 @@ research-agent/
 │           └── search.py
 │
 └── README.md
+```
+
+### Backend
+
+The backend is responsible for the core research workflow and API.
+
+- `agent/` — LangGraph workflow and agent nodes
+- `api/routes/` — FastAPI API endpoints
+- `core/` — Application configuration
+- `mcp/` — MCP client for communicating with the MCP server
+- `schemas/` — Pydantic schemas
+- `tools/` — Backend-side tools and utilities
+
+### Client
+
+The client is a **Next.js App Router** application responsible for the research interface and consuming the backend's SSE stream.
+
+### MCP Server
+
+The MCP server provides external tools to the research agent.
+
+- `server.py` — MCP server initialization and tool registration
+- `config.py` — MCP server configuration
+- `tools/search.py` — Tavily-powered web search implementation
 
 ---
 
@@ -311,14 +367,69 @@ The current v1 architecture consists of:
 - **LangGraph state machine**
 - **Planner → Researcher → Synthesizer workflow**
 - Structured research planning with **Pydantic**
-- MCP-based web search
-- Tavily search integration
+- MCP-based tool integration
+- Tavily web search
+- LangChain MCP adapters
 - Custom LangGraph progress events
 - FastAPI backend
 - SSE-based event streaming
 - Next.js frontend
 - OpenRouter LLM integration
 
+The main workflow is intentionally separated into independent stages:
+
+```text
+                 ┌───────────┐
+                 │  Planner  │
+                 └─────┬─────┘
+                       │
+                 Research Plan
+                       │
+                       ▼
+                ┌────────────┐
+                │ Researcher │
+                └─────┬──────┘
+                      │
+                 MCP Search
+                      │
+                      ▼
+                ┌────────────┐
+                │ Synthesizer│
+                └─────┬──────┘
+                      │
+                      ▼
+                 Final Answer
+```
+
+---
+
+## Status
+
+**v1 — In active development**
+
+### Completed
+
+- [x] LangGraph agent workflow
+- [x] Research planning
+- [x] Structured planner output
+- [x] MCP client/server integration
+- [x] Tavily web search
+- [x] Research task execution
+- [x] Per-task progress events
+- [x] SSE streaming
+- [x] Initial frontend interface
+- [x] Research state management
+
+### In Progress
+
+- [ ] Frontend research progress UI
+- [ ] Final answer streaming
+- [ ] Improved conversation memory
+- [ ] Better research result formatting
+- [ ] Error handling and retries
+- [ ] Production deployment
+
+---
 
 ## Goal
 

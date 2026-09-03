@@ -401,35 +401,6 @@ The main workflow is intentionally separated into independent stages:
                  Final Answer
 ```
 
----
-
-## Status
-
-**v1 — In active development**
-
-### Completed
-
-- [x] LangGraph agent workflow
-- [x] Research planning
-- [x] Structured planner output
-- [x] MCP client/server integration
-- [x] Tavily web search
-- [x] Research task execution
-- [x] Per-task progress events
-- [x] SSE streaming
-- [x] Initial frontend interface
-- [x] Research state management
-
-### In Progress
-
-- [ ] Frontend research progress UI
-- [ ] Final answer streaming
-- [ ] Improved conversation memory
-- [ ] Better research result formatting
-- [ ] Error handling and retries
-- [ ] Production deployment
-
----
 
 ## Goal
 

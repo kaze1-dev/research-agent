@@ -1,23 +1,26 @@
-from langchain.agents import create_agent
-from backend.agent.model import model
-from backend.mcp.client import get_mcp_tools
-from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.graph import StateGraph, START, END
+
+from backend.agent.state import ResearchState
+from backend.agent.planner import planner
+from backend.agent.researcher import researcher
+from backend.agent.synthesizer import synthesizer
+
 
 agent = None
 
 
 async def initialize_agent():
-  global agent
-  
-  tools = await get_mcp_tools()
+    global agent
 
-  checkpointer = InMemorySaver()
-  agent = create_agent(
-    model=model,
-    tools=tools,
-    checkpointer=checkpointer,
-    system_prompt="""You are a research assistant.
-    Answer normal greetings and casual conversation directly without using tools.
-    Use the available tools only when the user asks for information that requires research or up-to-date data.
-    Never invent facts."""
-  )
+    graph = StateGraph(ResearchState)
+
+    graph.add_node("planner", planner)
+    graph.add_node("researcher", researcher)
+    graph.add_node("synthesizer", synthesizer)
+
+    graph.add_edge(START, "planner")
+    graph.add_edge("planner", "researcher")
+    graph.add_edge("researcher", "synthesizer")
+    graph.add_edge("synthesizer", END)
+
+    agent = graph.compile()

@@ -16,7 +16,7 @@ async def research(query: str):
                 "query": query,
                 "plan": [],
                 "research": [],
-                "answers": "",
+                "answer": "",
             },
             config={
                 "configurable": {
@@ -42,6 +42,30 @@ async def research(query: str):
                             "event": "plan",
                             "data": task,
                         }
+
+                elif "synthesizer" in chunk:
+
+                    answer = chunk["synthesizer"]["answer"]
+
+                    yield {
+                        "event": "synthesis_started",
+                        "data": "Synthesizing...",
+                    }
+
+                    yield {
+                        "event": "final_answer",
+                        "data": answer,
+                    }
+
+                elif "casual" in chunk:
+                    answer = chunk["casual"]["answer"]
+
+                    yield {
+                        "event": "final_answer",
+                        "data": answer,
+                    }
+
+                
 
             elif mode == "custom":
 

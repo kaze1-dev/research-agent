@@ -16,7 +16,7 @@ export default function ResearchWorkspace({
    const [input, setInput] = useState("");
    const [messages, setMessages] = useState<Message[]>([]);
    const [isLoading, setIsLoading] = useState(false);
-
+   const [progress, setProgress] = useState<string[]>([]);
    async function handleSubmit() {
       const prompt = input.trim();
 
@@ -55,7 +55,9 @@ export default function ResearchWorkspace({
          );
 
          if (!response.ok) {
-            throw new Error(`Request failed with status ${response.status}`);
+            throw new Error(
+               `Request failed with status ${response.status}`
+            );
          }
 
          if (!response.body) {
@@ -90,23 +92,60 @@ export default function ResearchWorkspace({
                   }
 
                   if (line.startsWith("data:")) {
-                     dataLines.push(line.slice("data:".length));
+                     dataLines.push(line.slice("data:".length).trim());
                   }
                }
 
                const data = dataLines.join("\n");
 
-               if (eventType === "message" && data) {
-                  setMessages((currentMessages) =>
-                     currentMessages.map((message) =>
-                        message.id === assistantMessageId
-                           ? {
-                              ...message,
-                              content: message.content + data,
-                           }
-                           : message
-                     )
-                  );
+               if (!data) continue;
+
+               switch (eventType) {
+                  case "planning":
+                     setProgress((current) => [...current, data]);
+                     break;
+
+                  case "plan":
+                     setProgress((current) => [...current, `Research task: ${data}`]);
+                     break;
+
+                  case "task_started":
+                     setProgress((current) => [...current, `Researching: ${data}`]);
+                     break;
+
+                  case "task_completed":
+                     setProgress((current) => [...current, `Completed: ${data}`]);
+                     break;
+
+                  case "synthesis_started":
+                     setProgress((current) => [...current, data]);
+                     break;
+
+                  case "final_answer":
+                     setMessages((currentMessages) =>
+                        currentMessages.map((message) =>
+                           message.id === assistantMessageId
+                              ? {
+                                 ...message,
+                                 content: data,
+                              }
+                              : message
+                        )
+                     );
+                     break;
+
+                  case "message":
+                     setMessages((currentMessages) =>
+                        currentMessages.map((message) =>
+                           message.id === assistantMessageId
+                              ? {
+                                 ...message,
+                                 content: message.content + data,
+                              }
+                              : message
+                        )
+                     );
+                     break;
                }
             }
          }
@@ -162,6 +201,24 @@ export default function ResearchWorkspace({
          {/* Messages */}
          <div className="flex-1 overflow-y-auto">
             <div className="mx-auto w-full max-w-3xl space-y-8 px-4 py-8 sm:px-6">
+               {progress.length > 0 && (
+                  <div className="mb-8 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+                     <p className="mb-3 text-xs font-medium text-zinc-500">
+                        Research progress
+                     </p>
+
+                     <div className="space-y-2">
+                        {progress.map((item, index) => (
+                           <div
+                              key={index}
+                              className="text-sm text-zinc-400"
+                           >
+                              {item}
+                           </div>
+                        ))}
+                     </div>
+                  </div>
+               )}
                {messages.map((message) => {
                   const isUser = message.role === "user";
 

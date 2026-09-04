@@ -2,7 +2,8 @@ from typing import TypedDict
 
 
 class ResearchState(TypedDict):
-   query: str
-   plan: list[str]
-   research: list[str]
-   answers: str
+    query: str
+    needs_research: bool
+    plan: list[str]
+    research: list[str]
+    answer: str

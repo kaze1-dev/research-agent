@@ -24,3 +24,133 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.research-markdown {
+  color: rgb(212 212 216);
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.research-markdown h1 {
+  margin-top: 1.75rem;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: rgb(244 244 245);
+}
+
+.research-markdown h2 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: rgb(244 244 245);
+}
+
+.research-markdown h3 {
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgb(244 244 245);
+}
+
+.research-markdown p {
+  margin-bottom: 1rem;
+}
+
+.research-markdown strong {
+  font-weight: 600;
+  color: rgb(244 244 245);
+}
+
+.research-markdown ul {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.research-markdown ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+  list-style-type: decimal;
+}
+
+.research-markdown li {
+  margin-bottom: 0.35rem;
+}
+
+.research-markdown li::marker {
+  color: rgb(113 113 122);
+}
+
+.research-markdown blockquote {
+  margin: 1rem 0;
+  padding-left: 1rem;
+  border-left: 2px solid rgb(63 63 70);
+  color: rgb(161 161 170);
+}
+
+.research-markdown a {
+  color: rgb(228 228 231);
+  text-decoration: underline;
+  text-decoration-color: rgb(82 82 91);
+  text-underline-offset: 3px;
+}
+
+.research-markdown a:hover {
+  text-decoration-color: rgb(161 161 170);
+}
+
+.research-markdown hr {
+  margin: 1.5rem 0;
+  border-color: rgb(39 39 42);
+}
+
+.research-markdown code {
+  border-radius: 0.375rem;
+  background: rgb(39 39 42);
+  padding: 0.15rem 0.35rem;
+  font-size: 0.875em;
+  color: rgb(228 228 231);
+}
+
+.research-markdown pre {
+  margin: 1rem 0;
+  overflow-x: auto;
+  border: 1px solid rgb(39 39 42);
+  border-radius: 0.75rem;
+  background: rgb(24 24 27);
+  padding: 1rem;
+}
+
+.research-markdown pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 0.875rem;
+  color: rgb(228 228 231);
+}
+
+.research-markdown table {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.research-markdown th {
+  border: 1px solid rgb(63 63 70);
+  background: rgb(39 39 42);
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: rgb(244 244 245);
+}
+
+.research-markdown td {
+  border: 1px solid rgb(39 39 70);
+  padding: 0.6rem 0.75rem;
+  color: rgb(212 212 216);
+}
